@@ -1,16 +1,12 @@
 #!/usr/bin/python
-import genanki
 from pathlib import Path
 import regex as re
-# import re
-from easygui import codebox
-import tkinter as tk
-import pymsgbox
-from contextlib import contextmanager
-
-import csv
-import os, fnmatch
+import os
 import argparse
+import genanki
+# import pymsgbox
+# import tkinter as tk
+# from easygui import codebox
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--txt", type=str,
@@ -34,7 +30,6 @@ my_model = genanki.Model(
         },
     ])
 
-### get the all answers
 try:
     def getRightAnswers(file):
         with open(Path(file), encoding="utf8", errors='ignore') as f:
@@ -42,7 +37,6 @@ try:
             matches = re.search(r"(Right answer)[Ա-ֆա-ֆA-Za-z\n\d\.]+", contents)
             assert(matches)
             return matches[0]
-
 
     txtFile = None
 
@@ -65,14 +59,14 @@ try:
 
     with open(Path(txtFile), encoding="utf8", errors='ignore') as f:
         contents = f.read()
-        n = 0
+        numberOfAnswers = 0
         for frage in re.split(r"\d\.\d\/", contents):
             # skip the first intro stuff, it is specific for the task
-            if n == 0:
-                n+=1
+            if numberOfAnswers == 0:
+                numberOfAnswers+=1
                 continue
-            frage = "\n\n\n\n0.0/" + str(n) + frage
-            back = getAnswer(n);
+            frage = "\n\n\n\n0.0/" + str(numberOfAnswers) + frage
+            back = getAnswer(numberOfAnswers);
             front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և\d\.\+\)]+)\n\n", frage, overlapped=True)
             assert(back)
             assert(front)
@@ -89,11 +83,11 @@ try:
             front = front[0]
             back = "\n\n\n" + back[0]
             front = front.strip()
-            n += 1
-            i = 0
+            numberOfAnswers += 1
+            index = 0
             while not(front.endswith(".") or front.endswith("?")
-                      or front.endswith(")") or front.endswith(":")) and i<2:
-                i += 1
+                      or front.endswith(")") or front.endswith(":")) and index<2:
+                index += 1
                 newfront, back = back.split("\n", 1)
                 front += newfront
             if front.startswith("- "):
@@ -106,7 +100,7 @@ try:
             # with tk(timeout=1.5):
             #   codebox("Contents of file " + filename, "Show File Contents", text)
             # pymsgbox.native.alert(back, front)
-            # if(n>15):
+            # if(numberOfAnswers>15):
             #   print("Frage: ", front, "\n\nAntwort: ", back)
         genanki.Package(my_deck).write_to_file(txtFileName + ".apkg")
         print("DONE EXPORTING " + txtFileName + ".apkg")
