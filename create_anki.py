@@ -1,6 +1,8 @@
+#!/usr/bin/python
 import genanki
 from pathlib import Path
-import re
+import regex as re
+# import re
 from easygui import codebox
 import tkinter as tk
 import pymsgbox
@@ -24,20 +26,54 @@ my_model = genanki.Model(
 my_deck = genanki.Deck(
     2059400110,
     'test')
-with open(Path('test.txt'), encoding="utf8", errors='ignore') as f:
+
+### get the all answers
+def getRightAnswers(file):
+    with open(Path(file), encoding="utf8", errors='ignore') as f:
+        contents = f.read()
+        matches = re.search(r"(Right answer)[Ա-ֆա-ֆA-Za-z\n\d\.]+", contents)
+        assert(matches)
+        return matches[0]
+rightAnswer=getRightAnswers('Raf/13_1________________________________________________________________________________________.DOC.txt')
+
+def getAnswer(n):
+    global rightAnswer
+    answer = None
+    # toMatch = "[" + str(n) + "].\[ա֊ֆ]"
+    matches = re.search(r"(" + str(n) + ")\.(?P<name>[Ա-ֆա-ֆ])", rightAnswer)
+    # print("getAnswer ----- ",matches)
+    # matches = re.search(r"(24)\.(?P<name>[Ա-ֆա-ֆ])", rightAnswer)
+    print("getAnswer ----- ",matches)
+    return matches
+
+    
+
+with open(Path('Raf/13_1________________________________________________________________________________________.DOC.txt'), encoding="utf8", errors='ignore') as f:
     # contents = Path('IT-Sicherheit-Fragen-TINF15AIBC.txt').read_text()
     contents = f.read()
     n = 0
     for frage in re.split(r"\d\.\d\/", contents):
-        frage = "\n\n\n\n0.0/" + frage
-        back = re.findall(r"\n\ա\)\S*\s*\n\բ\)\S*\s*\n\գ\)\S*\s*\n\դ\)\S*\s*", frage)
-        front = re.findall(r"\d\.\d\/(?P<name>[Ա-ֆա-ֆ\s\-\d\`\,\/\n .]+)\n\n", frage)
-        if len(back) is not 0:
-            print("back>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", back[0])
+        if n == 0:
+            n+=1
+            continue
+        frage = "\n\n\n\n0.0/" + str(n) + frage
+        print(frage)
+        back = getAnswer(n);
+        # front matches                                         "\d.\d/(?P<name>[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և]+)"
+        # midle part, the end part with abgd                    "\d\.(?P<name>[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և]+)"
+        # end part with middle part                             "\d.\d/(?P<name>[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և\d\.]+)"
+        # get the right answer fage                             "(Right answer)[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և\d\.]+"
+
+        front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և\d\.\+\)]+)\n\n", frage, overlapped=True)
+        if len(back) != 0:
+            # print("back>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", back[0])
+            # print("back \ncount>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", n)
+            print()
         else:
             continue
-        if len(front) is not 0:
-            print("front>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", front[0])
+        if len(front) != 0:
+            print()
+            # print("front>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", front[0])
         else:
             continue
         front = front[0]
