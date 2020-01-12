@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--txt", type=str,
 	help="txt file", required=True)
 parser.add_argument("-d", "--debug", type=bool,
-	help="print debug info, example -> [-d 0]", required=False)
+    help="print debug info, example -> [-d 0]", required=False)
 args = vars(parser.parse_args())
 
 my_model = genanki.Model(
@@ -34,7 +34,7 @@ try:
     def getRightAnswers(file):
         with open(Path(file), encoding="utf8", errors='ignore') as f:
             contents = f.read()
-            matches = re.search(r"(Right answer)[Ա-ֆա-ֆA-Za-z\n\d\.]+", contents)
+            matches = re.search(r"(Right answer)[Ա-ֆա-ֆA-Za-z\n\d\.\ \)]+", contents)
             assert(matches)
             return matches[0]
 
@@ -45,6 +45,7 @@ try:
         txtFileName = os.path.basename(txtFile)
         # print(txtFileName)
         rightAnswers=getRightAnswers(txtFile)
+        print("************************* debug rightAnswer ****************", rightAnswers)
 
     my_deck = genanki.Deck(
         2059400110,
@@ -53,7 +54,8 @@ try:
     def getAnswer(n):
         global rightAnswers
         answer = None
-        matches = re.search(r"(" + str(n) + ")\.(?P<name>[Ա-ֆա-ֆ])", rightAnswers)
+        matches = re.search(r"(" + str(n) + ")\. (?P<name>[Ա-ֆա-ֆ])\)", rightAnswers)
+        print("************************* debug ****************", matches)
         assert(matches)
         return matches
 
@@ -66,21 +68,24 @@ try:
                 numberOfAnswers+=1
                 continue
             frage = "\n\n\n\n0.0/" + str(numberOfAnswers) + frage
+            print("********************* frage *****************", frage)
             back = getAnswer(numberOfAnswers);
             front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և\d\.\+\)]+)\n\n", frage, overlapped=True)
+            print("***************************** front ******************", front)
+            front = frage
             assert(back)
             assert(front)
             if len(back) != 0:
-                # print("back:", back[0])
-                pass
+                print("back:", back[0])
+                # pass
             else:
                 continue
             if len(front) != 0:
-                # print("front:", front[0])
-                pass
+                print("front:", front[0])
+                # pass
             else:
                 continue
-            front = front[0]
+            # front = front[0]
             back = "\n\n\n" + back[0]
             front = front.strip()
             numberOfAnswers += 1
