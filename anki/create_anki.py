@@ -10,9 +10,11 @@ import genanki
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--txt", type=str,
-	help="txt file", required=True)
+    help="txt file", required=True)
 parser.add_argument("-d", "--debug", type=bool,
     help="print debug info, example -> [-d 0]", required=False)
+parser.add_argument("-te", "--test", type=bool,
+    help="activate Test mode !! -> [-te if 1, then test mode is activated, else not activated", required=False)
 args = vars(parser.parse_args())
 
 my_model = genanki.Model(
@@ -30,6 +32,12 @@ my_model = genanki.Model(
         },
     ])
 
+counter_a = 0
+counter_b = 0
+counter_g = 0
+counter_d = 0
+global_counter = 0 
+
 try:
     def getRightAnswers(file):
         with open(Path(file), encoding="utf8", errors='ignore') as f:
@@ -45,7 +53,7 @@ try:
         txtFileName = os.path.basename(txtFile)
         # print(txtFileName)
         rightAnswers=getRightAnswers(txtFile)
-        print("************************* debug rightAnswer ****************", rightAnswers)
+        # print("************************* debug rightAnswer ****************", rightAnswers)
 
     my_deck = genanki.Deck(
         2059400110,
@@ -55,7 +63,7 @@ try:
         global rightAnswers
         answer = None
         matches = re.search(r"(" + str(n) + ")\. (?P<name>[Ա-ֆա-ֆ])\)", rightAnswers)
-        print("************************* debug ****************", matches)
+        # print("************************* debug ****************", matches)
         assert(matches)
         return matches
 
@@ -68,25 +76,45 @@ try:
                 numberOfAnswers+=1
                 continue
             frage = "\n\n\n\n0.0/" + str(numberOfAnswers) + frage
-            print("********************* frage *****************", frage)
+            # print("********************* frage *****************", frage)
             back = getAnswer(numberOfAnswers);
             front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և\d\.\+\)]+)\n\n", frage, overlapped=True)
-            print("***************************** front ******************", front)
+            # print("***************************** front ******************", front)
             front = frage
             assert(back)
             assert(front)
             if len(back) != 0:
-                print("back:", back[0])
-                # pass
+                # print("back:", back[0])
+                pass
             else:
                 continue
             if len(front) != 0:
-                print("front:", front[0])
-                # pass
+                # print("front:", front[0])
+                pass
             else:
                 continue
             # front = front[0]
             back = "\n\n\n" + back[0]
+            # print(back)
+            stat_answer_per_chapter = None 
+
+            find_stat_a = re.findall(r"[ա]", back)
+            if find_stat_a:
+                counter_a += 1
+                global_counter += 1
+            find_stat_b = re.findall(r"[բ]", back)
+            if find_stat_b:
+                counter_b += 1
+                global_counter += 1
+            find_stat_g = re.findall(r"[գ]", back)
+            if find_stat_g:
+                counter_g += 1
+                global_counter += 1
+            find_stat_d = re.findall(r"[դ]", back)
+            if find_stat_d:
+                counter_d += 1
+                global_counter += 1
+
             front = front.strip()
             numberOfAnswers += 1
             index = 0
@@ -108,8 +136,18 @@ try:
             # if(numberOfAnswers>15):
             #   print("Frage: ", front, "\n\nAntwort: ", back)
         genanki.Package(my_deck).write_to_file(txtFileName + ".apkg")
-        print("DONE EXPORTING " + txtFileName + ".apkg")
+
+        # print("for test ", txtFileName , " a: ", int(counter_a), "b: ", int(counter_b), "g: ", int(counter_g), "d: ", int(counter_d), "counter: ", global_counter)
+        print("", int(counter_a), "", int(counter_b), "", int(counter_g), "", int(counter_d), "", global_counter)
+        if args.get("test", False):
+            if counter_a/global_counter*100 != 0:
+                print("TEST HAS PASSED, CONGRAGTULATIONS !!! yuhu")
+            else:
+                print("TEST FAILED !!!")
+
+        # print("DONE EXPORTING " + txtFileName + ".apkg")
 except AssertionError as error:
     print("ERROR: " + txtFile + ":")
     if args.get("debug", False):
-        print("DEBUG INFO\n\t" +error)
+        pass
+        # print("DEBUG INFO\n\t" +error)
