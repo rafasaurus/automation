@@ -4,9 +4,6 @@ import regex as re
 import os
 import argparse
 import genanki
-# import pymsgbox
-# import tkinter as tk
-# from easygui import codebox
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--txt", type=str,
@@ -34,7 +31,7 @@ try:
     def getRightAnswers(file):
         with open(Path(file), encoding="utf8", errors='ignore') as f:
             contents = f.read()
-            matches = re.search(r"(Right answer)[Ա-ֆա-ֆA-Za-z\n\d\.]+", contents)
+            matches = re.search(r"(Right answer)[Ա-ֆա-ֆA-Za-z\n\d\. \t]+", contents)
             assert(matches)
             return matches[0]
 
@@ -53,7 +50,7 @@ try:
     def getAnswer(n):
         global rightAnswers
         answer = None
-        matches = re.search(r"(" + str(n) + ")\.(?P<name>[Ա-ֆա-ֆ])", rightAnswers)
+        matches = re.search(str(n) + "(?:.)?(?P<name>[Ա-ֆա-ֆ\u0080-\uFFFF])", rightAnswers)
         assert(matches)
         return matches
 
@@ -66,8 +63,14 @@ try:
                 numberOfAnswers+=1
                 continue
             frage = "\n\n\n\n0.0/" + str(numberOfAnswers) + frage
+            # print(frage)
             back = getAnswer(numberOfAnswers);
-            front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆA-Za-z.\-\`\,\/\n …….–և\d\.\+\)]+)\n\n", frage, overlapped=True)
+
+            # working with catdoc output via generate.sh
+            # front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆa-zA-Z\u0080-\uFFFF.\-\`\,\/\n\t() …….–և\d\.\+\)]+)\n\n", frage, re.UNICODE)
+
+            # working with generate_libre.sh output
+            front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆa-zA-Z\u0080-\uFFFF.\-\`\,\/\n\t() …….–և\d\.\+\)]+)", frage, re.UNICODE)
             assert(back)
             assert(front)
             if len(back) != 0:
@@ -96,15 +99,15 @@ try:
                 model=my_model,
                 fields=[front, back.replace("\n", "<br>")])
             my_deck.add_note(my_note)
-            # print(back.replace("\n", "<br>"))
-            # with tk(timeout=1.5):
-            #   codebox("Contents of file " + filename, "Show File Contents", text)
-            # pymsgbox.native.alert(back, front)
-            # if(numberOfAnswers>15):
-            #   print("Frage: ", front, "\n\nAntwort: ", back)
+
         genanki.Package(my_deck).write_to_file(txtFileName + ".apkg")
         print("DONE EXPORTING " + txtFileName + ".apkg")
 except AssertionError as error:
-    print("ERROR: " + txtFile + ":")
+    print("###### ERROR NO MATCH ####### \t\t" + txtFile + ":")
     if args.get("debug", False):
         print("DEBUG INFO\n\t" +error)
+except Exception as exception:
+    print("###### ERROR GENERAL EXCEPTION ####### \t\t" + txtFile + ":")
+    if args.get("debug", False):
+        print("DEBUG INFO\n\t" +error)
+
