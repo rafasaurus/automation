@@ -19,3 +19,6 @@ todo
 data_0 [+]
 data_1 [-]
 data_2 [+]
+
+### for catdoc
+catdoc -m300 -x -a *.txt

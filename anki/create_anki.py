@@ -65,24 +65,23 @@ try:
             frage = "\n\n\n\n0.0/" + str(numberOfAnswers) + frage
             # print(frage)
             back = getAnswer(numberOfAnswers);
-
-            # working with catdoc output via generate.sh
+            # working with catdoc output via generate.sh, README.md
             # front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆa-zA-Z\u0080-\uFFFF.\-\`\,\/\n\t() …….–և\d\.\+\)]+)\n\n", frage, re.UNICODE)
 
-            # working with generate_libre.sh output
             front = re.findall(r"\d.\d/(?P<name>[Ա-ֆա-ֆa-zA-Z\u0080-\uFFFF.\-\`\,\/\n\t() …….–և\d\.\+\)]+)", frage, re.UNICODE)
             assert(back)
             assert(front)
-            if len(back) != 0:
-                # print("back:", back[0])
-                pass
-            else:
-                continue
-            if len(front) != 0:
-                # print("front:", front[0])
-                pass
-            else:
-                continue
+            if args.get("debug", False):
+                if len(back) != 0:
+                    print("back:", back[0])
+                    pass
+                else:
+                    continue
+                if len(front) != 0:
+                    print("front:", front[0])
+                    pass
+                else:
+                    continue
             front = front[0]
             back = "\n\n\n" + back[0]
             front = front.strip()
